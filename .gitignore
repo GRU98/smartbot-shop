@@ -1,0 +1,37 @@
+# Python
+.env
+*.env
+*.pyc
+*.pyo
+__pycache__/
+.venv/
+venv/
+*.sqlite3
+
+# Django generated
+media/
+staticfiles/
+*.log
+
+# Frontend
+node_modules/
+dist/
+build/
+.next/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+secrets.json
+
+# Docker volumes / local overrides
+docker-compose.override.yml

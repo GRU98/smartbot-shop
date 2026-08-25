@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-smartbot}
+      POSTGRES_USER: ${PGUSER:-smartbot}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-smartbot} -d ${PGDATABASE:-smartbot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      REDIS_URL: "redis://redis:6379/0"
+    volumes:
+      - backend_static:/app/staticfiles
+      - backend_media:/app/media
+
+  preview_auth:
+    build:
+      context: ./preview_auth
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PREVIEW_PASSWORD: ${PREVIEW_PASSWORD:-123456789}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - preview_auth
+    ports:
+      - "80:80"
+    volumes:
+      - backend_static:/app/staticfiles:ro
+      - backend_media:/app/media:ro
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_static:
+    driver: local
+  backend_media:
+    driver: local

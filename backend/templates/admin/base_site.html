@@ -1,0 +1,464 @@
+{% extends "admin/base.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-card: #161616;
+    --bg-input: #0d0d0d;
+    --border: #222222;
+    --border-hover: #333333;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --accent: #ffffff;
+    --accent-dim: rgba(255,255,255,0.08);
+    --danger: #ff4444;
+    --success: #00cc88;
+    --radius: 10px;
+  }
+
+  * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; }
+
+  body {
+    background: var(--bg-primary) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  /* Header */
+  #header {
+    background: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 14px 24px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  #branding h1 {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+    font-weight: 600 !important;
+  }
+
+  #branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--text-primary) !important;
+    text-decoration: none !important;
+  }
+
+  #user-tools {
+    font-size: 13px !important;
+    color: var(--text-muted) !important;
+  }
+  #user-tools a { color: var(--text-secondary) !important; text-decoration: none !important; }
+  #user-tools a:hover { color: var(--text-primary) !important; }
+
+  /* Breadcrumbs */
+  .breadcrumbs {
+    background: var(--bg-primary) !important;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text-muted) !important;
+    font-size: 12px !important;
+    padding: 10px 24px !important;
+  }
+  .breadcrumbs a { color: var(--text-secondary) !important; text-decoration: none !important; }
+  .breadcrumbs a:hover { color: var(--text-primary) !important; }
+
+  /* Content */
+  #content { padding: 24px !important; }
+  #content h1 { color: var(--text-primary) !important; font-size: 22px !important; font-weight: 600 !important; }
+
+  /* Links */
+  a:link, a:visited { color: var(--text-secondary); text-decoration: none; }
+  a:hover { color: var(--text-primary); }
+
+  /* Modules */
+  .module, .dashboard #content-main .module {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden;
+    margin-bottom: 20px !important;
+  }
+
+  .module h2, .module caption {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    padding: 14px 18px !important;
+    margin: 0 !important;
+  }
+
+  .module td, .module th {
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important;
+    padding: 11px 18px !important;
+    font-size: 13px !important;
+  }
+
+  .module th { color: var(--text-muted) !important; font-weight: 500 !important; text-transform: uppercase; font-size: 11px !important; letter-spacing: 0.5px; }
+  .module th a:link, .module th a:visited { color: var(--text-secondary) !important; }
+  .module td a:link, .module td a:visited { color: var(--text-primary) !important; }
+  .module tr:last-child td { border-bottom: none !important; }
+  .module tr:hover td { background: var(--accent-dim) !important; }
+
+  /* Form inputs */
+  input[type="text"], input[type="password"], input[type="email"],
+  input[type="url"], input[type="number"], input[type="tel"],
+  textarea, select {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text-primary) !important;
+    padding: 11px 14px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s !important;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--text-muted) !important;
+    outline: none !important;
+  }
+
+  label { color: var(--text-secondary) !important; font-size: 13px !important; }
+
+  /* Buttons */
+  .submit-row {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 16px !important;
+    margin-top: 20px !important;
+  }
+
+  .submit-row input[type="submit"], input[type="submit"], .button, a.button {
+    background: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #000 !important;
+    padding: 10px 22px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    text-transform: none !important;
+  }
+
+  .submit-row input[type="submit"]:hover, input[type="submit"]:hover, .button:hover {
+    opacity: 0.85;
+  }
+
+  .submit-row .deletelink-box a, .deletelink {
+    color: var(--danger) !important;
+    font-size: 13px !important;
+  }
+
+  /* Sidebar */
+  #nav-sidebar {
+    background: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border) !important;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+  }
+
+  #nav-sidebar .module h2 {
+    background: transparent !important;
+    font-size: 11px !important;
+    color: var(--text-muted) !important;
+    padding: 16px 18px 8px !important;
+    border: none !important;
+  }
+
+  #nav-sidebar th { padding: 4px 18px 2px !important; border: none !important; font-size: 11px !important; color: var(--text-muted) !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; }
+  #nav-sidebar th a { color: var(--text-muted) !important; font-size: 11px !important; }
+  #nav-sidebar td { padding: 4px 18px !important; border: none !important; }
+  #nav-sidebar td a { color: var(--text-secondary) !important; font-size: 13px !important; }
+  #nav-sidebar td a:hover { color: var(--text-primary) !important; }
+
+  /* Login page */
+  body.login {
+    background: var(--bg-primary) !important;
+  }
+
+  body.login #container {
+    background: transparent !important;
+  }
+
+  body.login #header {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-align: center;
+    padding-top: 60px !important;
+  }
+
+  body.login #branding h1 {
+    font-size: 20px !important;
+    letter-spacing: 4px !important;
+  }
+
+  body.login #content {
+    background: var(--bg-card) !important;
+    border-radius: 14px !important;
+    border: 1px solid var(--border) !important;
+    padding: 40px !important;
+    max-width: 400px;
+    margin: 40px auto !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  body.login #content h1 {
+    font-size: 16px !important;
+    margin-bottom: 24px !important;
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
+  }
+
+  body.login .submit-row {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-top: 16px !important;
+  }
+
+  body.login .submit-row input[type="submit"] {
+    width: 100%;
+    padding: 14px !important;
+    font-size: 14px !important;
+  }
+
+  /* Changelist */
+  #changelist {
+    background: transparent !important;
+  }
+
+  #changelist-filter {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+  }
+
+  #changelist-filter h2 { color: var(--text-primary) !important; font-size: 12px !important; }
+  #changelist-filter li { color: var(--text-secondary) !important; }
+  #changelist-filter a { color: var(--text-muted) !important; }
+  #changelist-filter li.selected a { color: var(--text-primary) !important; font-weight: 600; }
+
+  #changelist table {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden;
+  }
+
+  #changelist table thead th {
+    background: var(--bg-secondary) !important;
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 12px 16px !important;
+  }
+
+  #changelist table tbody td {
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+  }
+
+  #changelist table tbody tr:hover td {
+    background: var(--accent-dim) !important;
+  }
+
+  #changelist .paginator {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text-muted) !important;
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+
+  /* Toolbar / actions */
+  #changelist .actions {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  #changelist .actions select {
+    font-size: 13px !important;
+  }
+
+  #changelist-search input[type="text"] {
+    min-width: 280px !important;
+  }
+
+  /* Messages */
+  .messagelist li {
+    background: rgba(0,204,136,0.08) !important;
+    border: 1px solid rgba(0,204,136,0.2) !important;
+    border-radius: 8px !important;
+    color: var(--success) !important;
+    padding: 12px 18px !important;
+    font-size: 13px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .messagelist li.error, .messagelist li.warning {
+    background: rgba(255,68,68,0.08) !important;
+    border-color: rgba(255,68,68,0.2) !important;
+    color: var(--danger) !important;
+  }
+
+  /* Related widgets */
+  .related-widget-wrapper { color: var(--text-secondary) !important; }
+
+  /* Inlines */
+  .inline-group h2 {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .inline-group .tabular td, .inline-group .tabular th {
+    background: transparent !important;
+  }
+
+  /* Object tools */
+  .object-tools a {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    color: var(--text-secondary) !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  .object-tools a:hover { border-color: var(--border-hover) !important; color: var(--text-primary) !important; }
+
+  /* Help text */
+  .help, .helptext { color: var(--text-muted) !important; font-size: 12px !important; }
+
+  /* Checkbox */
+  input[type="checkbox"] {
+    accent-color: var(--text-primary);
+  }
+
+  /* Fieldsets */
+  fieldset { border: 1px solid var(--border) !important; border-radius: var(--radius) !important; background: var(--bg-card) !important; }
+  fieldset h2 { color: var(--text-primary) !important; }
+
+  /* Calendar */
+  .calendarbox, .clockbox {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text-secondary) !important;
+  }
+
+  /* Scroll */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* Sticky save button for list_editable */
+  #changelist .actions + p[style],
+  #changelist > form > p:last-of-type {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'secured_admin:index' %}">⚡ SmartBot</a>
+</h1>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const icons = {
+    'користувач': '👤', 'користувачі': '👤',
+    'запис аудиту': '🛡', 'журнал аудиту': '🛡',
+    'дозволена ip': '🔒', 'білий список': '🔒',
+    'totp': '🔑',
+    'товар': '🛍', 'товари': '🛍',
+    'категорі': '📁',
+    'відгук': '⭐', 'відгуки': '⭐',
+    'купон': '🎟', 'купони': '🎟',
+    'повідомлення': '🔔',
+    'замовлення': '📦',
+  };
+  document.querySelectorAll('#nav-sidebar .module').forEach(function(mod) {
+    var h2 = mod.querySelector('h2');
+    if (!h2) return;
+    var links = mod.querySelectorAll('td a');
+    links.forEach(function(a) {
+      var txt = a.textContent.trim().toLowerCase();
+      for (var key in icons) {
+        if (txt.includes(key)) {
+          a.textContent = icons[key] + ' ' + a.textContent.trim();
+          break;
+        }
+      }
+    });
+  });
+
+  /* Red row highlight for stock=0 in product changelist */
+  document.querySelectorAll('#result_list tbody tr').forEach(function(tr) {
+    var cells = tr.querySelectorAll('td');
+    cells.forEach(function(td) {
+      if (td.textContent.trim() === '❌') {
+        tr.style.background = 'rgba(239,68,68,0.05)';
+      }
+    });
+  });
+
+  /* Sticky save bar for list_editable */
+  var clForm = document.querySelector('#changelist form');
+  if (clForm) {
+    var saveBtn = clForm.querySelector('input[type="submit"][name="_save"]');
+    if (!saveBtn) saveBtn = clForm.querySelector('input[type="submit"]');
+    if (saveBtn) {
+      var bar = document.createElement('div');
+      bar.id = 'sticky-save-bar';
+      bar.style.cssText = [
+        'position:fixed','bottom:0','left:0','right:0','z-index:9999',
+        'background:#111','border-top:1px solid #2a2a2a',
+        'padding:10px 24px','display:flex','align-items:center','gap:12px',
+        'box-shadow:0 -4px 20px rgba(0,0,0,.5)'
+      ].join(';');
+      var btn = document.createElement('input');
+      btn.type = 'submit';
+      btn.name = '_save';
+      btn.value = '💾 Зберегти зміни';
+      btn.form = clForm.id || (clForm.id = 'cl-form-id');
+      btn.style.cssText = 'background:#fff;color:#000;border:none;border-radius:6px;padding:8px 20px;font-weight:700;font-size:13px;cursor:pointer;';
+      var hint = document.createElement('span');
+      hint.style.cssText = 'font-size:12px;color:#444;';
+      hint.textContent = 'Змінюй ціну та залишок прямо в таблиці, потім натисни зберегти';
+      bar.appendChild(btn);
+      bar.appendChild(hint);
+      document.body.appendChild(bar);
+      document.body.style.paddingBottom = '56px';
+    }
+  }
+});
+</script>
+{% endblock %}

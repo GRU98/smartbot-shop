@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Підтвердження 2FA — SmartBot Admin</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#020204;color:#e0e0e8;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#0a0a10;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:48px 40px;max-width:400px;width:100%;text-align:center}
+  .logo{display:inline-flex;align-items:center;gap:12px;margin-bottom:32px}
+  .logo-icon{width:40px;height:40px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff}
+  .logo-text{font-size:20px;font-weight:700;color:#fff;letter-spacing:1px}
+  .shield{font-size:48px;margin-bottom:16px}
+  h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:8px}
+  p{font-size:14px;color:#8a8a96;line-height:1.6;margin-bottom:24px}
+  .error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 16px;color:#ef4444;font-size:13px;margin-bottom:16px}
+  form{display:flex;flex-direction:column;gap:12px}
+  label{text-align:left;font-size:13px;font-weight:600;color:#a0a0a8}
+  input[type="text"]{background:#12121a;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:14px 16px;color:#fff;font-size:22px;letter-spacing:10px;text-align:center;outline:none;transition:border-color 0.2s}
+  input[type="text"]:focus{border-color:rgba(255,255,255,0.4)}
+  button{background:#fff;color:#000;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;transition:background 0.2s;letter-spacing:0.5px}
+  button:hover{background:#e5e5e5}
+  .info{font-size:12px;color:#4a4a56;margin-top:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    <span class="logo-text">SmartBot Admin</span>
+  </div>
+
+  <div class="shield">🔐</div>
+  <h1>Двофакторна автентифікація</h1>
+  <p>Введіть 6-значний код з вашого додатку Google Authenticator або Authy.</p>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <label for="otp_code">Одноразовий код</label>
+    <input type="text" id="otp_code" name="otp_code" maxlength="6" pattern="[0-9]{6}"
+           required autocomplete="off" inputmode="numeric" placeholder="000000" autofocus>
+    <button type="submit">Підтвердити вхід</button>
+  </form>
+
+  <p class="info">Код оновлюється кожні 30 секунд. Якщо код не підходить — зачекайте наступного і спробуйте знову.</p>
+</div>
+</body>
+</html>

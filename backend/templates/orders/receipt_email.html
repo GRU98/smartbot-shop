@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чек замовлення #{{ order.id }}</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f3f4f6; font-family: Arial, Helvetica, sans-serif; color: #111; }
+    .container { max-width: 600px; margin: 24px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .header { background: #111; color: #fff; padding: 28px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    .header p { margin: 6px 0 0; color: #aaa; font-size: 13px; }
+    .content { padding: 28px 24px; }
+    .section { margin-bottom: 22px; }
+    .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #6b7280; margin-bottom: 8px; }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    .row:last-child { border-bottom: none; }
+    .label { color: #6b7280; }
+    .value { font-weight: 600; color: #111; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th { background: #111; color: #fff; padding: 10px; font-size: 12px; text-align: left; }
+    td { padding: 10px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+    td:last-child, th:last-child { text-align: right; }
+    .total { background: #f9fafb; padding: 14px; text-align: right; font-size: 16px; font-weight: 700; }
+    .footer { background: #f9fafb; padding: 20px 24px; text-align: center; font-size: 12px; color: #6b7280; }
+    .button { display: inline-block; margin-top: 8px; padding: 12px 24px; background: #111; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Дякуємо за покупку!</h1>
+      <p>Чек замовлення #{{ order.id }}</p>
+    </div>
+
+    <div class="content">
+      <div class="section">
+        <div class="section-title">Продавець</div>
+        <div class="row"><span class="label">Назва</span><span class="value">{{ company_name }}</span></div>
+        <div class="row"><span class="label">ЄДРПОУ</span><span class="value">{{ company_edrpou }}</span></div>
+        <div class="row"><span class="label">Адреса</span><span class="value">{{ company_address }}</span></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Покупець</div>
+        <div class="row"><span class="label">Ім'я</span><span class="value">{{ order.user.name|default:order.user.email }}</span></div>
+        <div class="row"><span class="label">Email</span><span class="value">{{ order.user.email }}</span></div>
+        <div class="row"><span class="label">Дата</span><span class="value">{{ order.created_at|date:"d.m.Y H:i" }}</span></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Товари</div>
+        <table>
+          <thead>
+            <tr><th>№</th><th>Найменування</th><th>К-сть</th><th>Сума</th></tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.product_name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.line_total }} грн</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="total">Разом сплачено: {{ order.total_amount }} грн</div>
+      </div>
+
+      {% if order.delivery_city %}
+      <div class="section">
+        <div class="section-title">Доставка</div>
+        <div class="row"><span class="label">Отримувач</span><span class="value">{{ order.delivery_full_name|default:"—" }}</span></div>
+        <div class="row"><span class="label">Телефон</span><span class="value">{{ order.delivery_phone|default:"—" }}</span></div>
+        <div class="row"><span class="label">Адреса</span><span class="value">Нова Пошта, {{ order.delivery_city }}, {{ order.delivery_post_office|default:"—" }}</span></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="footer">
+      <p>PDF-версія чека додається до листа.</p>
+      <p>З повагою, команда {{ company_name }}</p>
+    </div>
+  </div>
+</body>
+</html>

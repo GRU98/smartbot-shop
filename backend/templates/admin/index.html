@@ -1,0 +1,222 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  #content h1 { display:none; }
+
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .sc {
+    background: #161616;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: border-color .15s;
+    text-decoration: none !important;
+    display: block;
+  }
+  .sc:hover { border-color: #383838; }
+  .sc-icon { font-size: 20px; margin-bottom: 10px; }
+  .sc-val { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -.5px; line-height: 1; }
+  .sc-val.warn { color: #f59e0b; }
+  .sc-val.danger { color: #ef4444; }
+  .sc-val.green { color: #22c55e; }
+  .sc-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: .8px; margin-top: 6px; }
+  .sc-sub { font-size: 12px; color: #444; margin-top: 4px; }
+  .sc-sub b { color: #666; }
+
+  .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media(max-width:900px){ .dash-row { grid-template-columns: 1fr; } }
+
+  .sec-head {
+    font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase;
+    letter-spacing: .8px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .sec-head span { flex:1; height:1px; background:#1e1e1e; }
+
+  .dt { background:#161616; border:1px solid #222; border-radius:10px; overflow:hidden; }
+  .dt-title { padding:12px 16px; font-size:12px; font-weight:600; color:#888; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; }
+  .dt-title a { font-size:11px; color:#444 !important; }
+  .dt-title a:hover { color:#888 !important; }
+  .dt table { width:100%; border-collapse:collapse; }
+  .dt th { padding:9px 14px; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#444; border-bottom:1px solid #1a1a1a; font-weight:600; text-align:left; background:#111; }
+  .dt td { padding:10px 14px; font-size:13px; color:#888; border-bottom:1px solid #171717; vertical-align:middle; }
+  .dt tr:last-child td { border:none; }
+  .dt tr:hover td { background:rgba(255,255,255,.015); }
+  .dt td a { color:#ccc !important; font-weight:500; }
+  .dt td a:hover { color:#fff !important; }
+  .dt-empty { padding:24px; text-align:center; color:#333; font-size:13px; }
+
+  .sb { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }
+  .sb-pending { background:rgba(245,158,11,.1); color:#f59e0b; }
+  .sb-paid { background:rgba(34,197,94,.1); color:#22c55e; }
+  .sb-shipped { background:rgba(59,130,246,.1); color:#60a5fa; }
+  .sb-delivered { background:rgba(34,197,94,.15); color:#4ade80; }
+  .sb-cancelled { background:rgba(239,68,68,.1); color:#f87171; }
+  .sb-failed { background:rgba(239,68,68,.1); color:#f87171; }
+
+  .qnav { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; margin-bottom:28px; }
+  .qn { display:flex; align-items:center; gap:9px; background:#161616; border:1px solid #1e1e1e; border-radius:8px; padding:11px 14px; color:#777 !important; font-size:13px; text-decoration:none !important; transition:.15s; }
+  .qn:hover { border-color:#333; color:#fff !important; background:#1c1c1c; }
+  .qn-icon { font-size:15px; flex-shrink:0; }
+
+  .alert-row { background:rgba(239,68,68,.04); }
+  .alert-row td { color:#f87171 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="dash-stats">
+  <a href="/admin/orders/order/?status__exact=pending" class="sc">
+    <div class="sc-icon">⏳</div>
+    <div class="sc-val warn">{{ orders_pending }}</div>
+    <div class="sc-label">Очікують оплати</div>
+    <div class="sc-sub">Натисни щоб переглянути</div>
+  </a>
+  <a href="/admin/orders/order/" class="sc">
+    <div class="sc-icon">📦</div>
+    <div class="sc-val">{{ total_orders }}</div>
+    <div class="sc-label">Всього замовлень</div>
+    <div class="sc-sub"><b>{{ orders_today }}</b> сьогодні</div>
+  </a>
+  <div class="sc">
+    <div class="sc-icon">💰</div>
+    <div class="sc-val green">{{ revenue_today|floatformat:0 }} <small style="font-size:14px;color:#166534">грн</small></div>
+    <div class="sc-label">Виручка сьогодні</div>
+    <div class="sc-sub"><b>{{ revenue_week|floatformat:0 }}</b> за 7 днів · <b>{{ revenue_month|floatformat:0 }}</b> за місяць</div>
+  </div>
+  <a href="/admin/accounts/user/" class="sc">
+    <div class="sc-icon">👥</div>
+    <div class="sc-val">{{ total_users }}</div>
+    <div class="sc-label">Користувачів</div>
+    <div class="sc-sub"><b>{{ users_today }}</b> нових сьогодні</div>
+  </a>
+  <a href="/admin/shop/product/" class="sc">
+    <div class="sc-icon">🛍</div>
+    <div class="sc-val">{{ total_products }}</div>
+    <div class="sc-label">Активних товарів</div>
+    <div class="sc-sub"><b class="{% if products_zero_stock %}danger{% endif %}">{{ products_zero_stock }}</b> немає · <b>{{ products_low_stock }}</b> мало</div>
+  </a>
+  <div class="sc">
+    <div class="sc-icon">📊</div>
+    <div class="sc-val green">{{ total_revenue|floatformat:0 }} <small style="font-size:14px;color:#166534">грн</small></div>
+    <div class="sc-label">Загальна виручка</div>
+    <div class="sc-sub">За весь час</div>
+  </div>
+</div>
+
+<!-- QUICK NAV -->
+<p class="sec-head">Швидка навігація <span></span></p>
+<div class="qnav">
+  <a href="/admin/orders/order/" class="qn"><span class="qn-icon">📋</span> Всі замовлення</a>
+  <a href="/admin/orders/order/?status__exact=pending" class="qn"><span class="qn-icon">⏳</span> Очікують оплати</a>
+  <a href="/admin/orders/order/?status__exact=paid" class="qn"><span class="qn-icon">✅</span> Оплачені</a>
+  <a href="/admin/shop/product/" class="qn"><span class="qn-icon">🛍</span> Товари</a>
+  <a href="/admin/shop/product/add/" class="qn"><span class="qn-icon">➕</span> Додати товар</a>
+  <a href="/admin/shop/category/" class="qn"><span class="qn-icon">📁</span> Категорії</a>
+  <a href="/admin/shop/coupon/" class="qn"><span class="qn-icon">🎟</span> Купони</a>
+  <a href="/admin/accounts/user/" class="qn"><span class="qn-icon">👤</span> Користувачі</a>
+  <a href="/admin/accounts/auditlog/" class="qn"><span class="qn-icon">🛡</span> Журнал аудиту</a>
+</div>
+
+<div class="dash-row">
+  <!-- PENDING ORDERS -->
+  <div>
+    <p class="sec-head">⏳ Очікують оплати <span></span> <a href="/admin/orders/order/?status__exact=pending">всі →</a></p>
+    <div class="dt">
+      {% if pending_orders %}
+      <table>
+        <thead><tr><th>#</th><th>Клієнт</th><th>Сума</th><th>Дата</th></tr></thead>
+        <tbody>
+          {% for o in pending_orders %}
+          <tr>
+            <td><a href="/admin/orders/order/{{ o.id }}/change/">#{{ o.id }}</a></td>
+            <td style="font-size:12px">{{ o.user.email }}</td>
+            <td><b style="color:#fff">{{ o.total_amount|floatformat:0 }} грн</b></td>
+            <td style="font-size:11px;color:#444">{{ o.created_at|date:"d.m H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="dt-empty">✅ Немає очікуючих замовлень</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ZERO STOCK -->
+  <div>
+    <p class="sec-head">❌ Товари без залишку <span></span> <a href="/admin/shop/product/?stock=0">всі →</a></p>
+    <div class="dt">
+      {% if zero_stock_products %}
+      <table>
+        <thead><tr><th>Товар</th><th>Категорія</th><th></th></tr></thead>
+        <tbody>
+          {% for p in zero_stock_products %}
+          <tr class="alert-row">
+            <td><a href="/admin/shop/product/{{ p.id }}/change/">{{ p.name }}</a></td>
+            <td style="font-size:12px;color:#555">{{ p.category }}</td>
+            <td><span style="color:#ef4444;font-weight:700;font-size:11px">0</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="dt-empty">✅ Всі товари в наявності</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- RECENT ORDERS -->
+{% if recent_orders %}
+<p class="sec-head">🕐 Останні замовлення <span></span> <a href="/admin/orders/order/">всі →</a></p>
+<div class="dt" style="margin-bottom:24px">
+  <table>
+    <thead>
+      <tr><th>#</th><th>Клієнт</th><th>Місто</th><th>Сума</th><th>Статус</th><th>Дата</th></tr>
+    </thead>
+    <tbody>
+      {% for o in recent_orders %}
+      <tr>
+        <td><a href="/admin/orders/order/{{ o.id }}/change/"><b>#{{ o.id }}</b></a></td>
+        <td style="font-size:12px">{{ o.user.email }}</td>
+        <td style="font-size:12px;color:#555">{{ o.delivery_city|default:"—" }}</td>
+        <td><b style="color:#fff">{{ o.total_amount|floatformat:0 }} грн</b></td>
+        <td><span class="sb sb-{{ o.status }}">{{ o.get_status_display }}</span></td>
+        <td style="font-size:11px;color:#444">{{ o.created_at|date:"d.m.Y H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- TOP PRODUCTS -->
+{% if top_products %}
+<p class="sec-head">⭐ Топ-10 товарів <span></span></p>
+<div class="dt" style="margin-bottom:24px">
+  <table>
+    <thead><tr><th>Товар</th><th>Продано</th><th>Виручка</th></tr></thead>
+    <tbody>
+      {% for item in top_products %}
+      <tr>
+        <td style="color:#ccc">{{ item.product_name }}</td>
+        <td><span class="sb sb-paid">{{ item.sold }} шт</span></td>
+        <td><b style="color:#22c55e">{{ item.revenue|floatformat:0 }} грн</b></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}
